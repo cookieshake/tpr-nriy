@@ -36,7 +36,7 @@ jobs:
 
       - name: Railpack build
         run: |
-          docker buildx \
+          docker buildx build \
             --build-arg BUILDKIT_SYNTAX="ghcr.io/railwayapp/railpack:railpack-frontend" \
             -f railpack-plan.json \
             .
