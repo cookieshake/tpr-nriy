@@ -1,7 +1,7 @@
 import os
 from tpr_nriy.workers import get_worker, worker_registry
 from tpr_nriy.trigger.http import app
-from tpr_nriy import get_temporal_client, temporal_client
+from tpr_nriy import get_temporal_client
 import uvicorn
 import anyio
 
