@@ -9,8 +9,8 @@ async def create_worker(client: Client):
     worker = Worker(
         client,
         task_queue="nriy",
-        workflows=get_all_workflows(),
-        activities=get_all_activities(),
+        workflows=list(get_all_workflows().values()),
+        activities=list(get_all_activities().values()),
         workflow_runner=SandboxedWorkflowRunner(
             restrictions=SandboxRestrictions.default.with_passthrough_all_modules()
         )
