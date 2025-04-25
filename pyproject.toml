@@ -1,0 +1,19 @@
+[project]
+name = "tpr-nriy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "temporalio>=1.11.0",
+    "pymongo>=4.12.0",
+    "httpx>=0.27.0",
+    "langchain[openai]>=0.3.24",
+    "uvicorn>=0.34.2",
+    "fastapi>=0.115.12",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
