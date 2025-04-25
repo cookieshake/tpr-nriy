@@ -1,7 +1,7 @@
 import os
 from tpr_nriy.workers import get_worker, worker_registry
 from tpr_nriy.trigger.http import app
-from tpr_nriy import temporal_client
+from tpr_nriy import get_temporal_client, temporal_client
 import uvicorn
 import anyio
 
@@ -14,6 +14,7 @@ async def run_worker(worker_name: str, task_queue_name: str):
         task_queue_name: Name of the task queue
     """
     try:
+        temporal_client = await get_temporal_client()
         # Get worker function
         worker_func = get_worker(temporal_client)
         
