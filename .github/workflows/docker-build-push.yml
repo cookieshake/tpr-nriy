@@ -31,8 +31,15 @@ jobs:
       - name: Install Railpack
         run: curl -sSL https://railpack.com/install.sh | sh
 
-      - name: Build Docker image with Railpack
-        run: BUILDKIT_HOST=unix:///run/buildkit/buildkitd.sock railpack build --name ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} .
+      - name: Railpack prepare
+        run: railpack prepare . --plan-out railpack-plan.json --info-out railpack-info.json
+
+      - name: Railpack build
+        run: |
+          docker buildx \
+            --build-arg BUILDKIT_SYNTAX="ghcr.io/railwayapp/railpack:railpack-frontend" \
+            -f railpack-plan.json \
+            .
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
