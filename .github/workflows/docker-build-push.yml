@@ -38,6 +38,7 @@ jobs:
         run: |
           docker buildx build \
             --build-arg BUILDKIT_SYNTAX="ghcr.io/railwayapp/railpack-frontend" \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             -f railpack-plan.json \
             .
 
