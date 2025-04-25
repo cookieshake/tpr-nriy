@@ -22,7 +22,7 @@ def _discover_workflows() -> Dict[str, Type]:
             # 모듈에서 @workflow.defn 데코레이터가 붙은 모든 클래스를 찾습니다.
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
-                if isinstance(attr, type) and hasattr(attr, "__temporal_workflow_definition__"):
+                if isinstance(attr, type) and hasattr(attr, "__temporal_workflow_definition"):
                     # 클래스 이름을 workflow 이름으로 사용합니다.
                     workflow_name = attr_name.lower()
                     workflow_registry[workflow_name] = attr

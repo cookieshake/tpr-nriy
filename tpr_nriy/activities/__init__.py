@@ -1,10 +1,10 @@
 import importlib
 import pkgutil
-from typing import Dict, Type, Any
+from typing import Dict, Type, Any, Callable
 from pathlib import Path
 from temporalio import activity
 
-def _discover_activities() -> Dict[str, Type]:
+def _discover_activities() -> Dict[str, Callable]:
     """activities 디렉토리에서 모든 activity 함수를 찾아서 등록합니다."""
     activity_registry = {}
     
@@ -22,7 +22,7 @@ def _discover_activities() -> Dict[str, Type]:
             # 모듈에서 @activity.defn 데코레이터가 붙은 모든 함수를 찾습니다.
             for attr_name in dir(module):
                 attr = getattr(module, attr_name)
-                if hasattr(attr, "__wrapped__") and isinstance(attr.__wrapped__, activity.Activity):
+                if callable(attr) and hasattr(attr, "__temporal_activity_definition"):
                     # 함수 이름을 activity 이름으로 사용합니다.
                     activity_registry[attr_name] = attr
         except ImportError as e:
@@ -33,12 +33,12 @@ def _discover_activities() -> Dict[str, Type]:
 # activity registry를 동적으로 생성합니다.
 activity_registry = _discover_activities()
 
-def get_activity(activity_name: str) -> Any:
+def get_activity(activity_name: str) -> Callable:
     """activity 이름으로 activity 함수를 가져옵니다."""
     if activity_name not in activity_registry:
         raise ValueError(f"Unknown activity: {activity_name}")
     return activity_registry[activity_name]
 
-def get_all_activities() -> Dict[str, Type]:
+def get_all_activities() -> Dict[str, Callable]:
     """등록된 모든 activity를 반환합니다."""
     return activity_registry
