@@ -1,11 +1,12 @@
 import os
+from temporalio.worker import Worker
 from tpr_nriy.workers import get_worker, worker_registry
 from tpr_nriy.trigger.http import app
 from tpr_nriy import get_temporal_client
 import uvicorn
 import anyio
 
-async def run_worker(worker_name: str, task_queue_name: str):
+async def run_worker(worker_name: str):
     """
     Run a worker.
     
@@ -16,11 +17,12 @@ async def run_worker(worker_name: str, task_queue_name: str):
     try:
         temporal_client = await get_temporal_client()
         # Get worker function
-        worker_func = get_worker(temporal_client)
+        worker_func = get_worker(worker_name)
+        worker: Worker = worker_func(temporal_client)
         
         # Run worker
-        print(f"Starting worker '{worker_name}'... (task_queue: {task_queue_name})")
-        await worker_func(task_queue_name)
+        print(f"Starting worker '{worker_name}'...")
+        await worker.run()
     except ValueError as e:
         print(f"Error: {e}")
         print(f"Available workers: {', '.join(worker_registry.keys())}")
@@ -44,10 +46,9 @@ async def main():
     if mode == "worker":
         # Get worker configuration
         worker_name = os.getenv("WORKER_NAME", "hello")
-        task_queue_name = os.getenv("TASK_QUEUE_NAME", f"{worker_name}")
         
         # Run worker
-        await run_worker(worker_name, task_queue_name)
+        await run_worker(worker_name)
     elif mode == "trigger":
         # Run trigger
         await run_trigger()
