@@ -3,5 +3,5 @@ import os
 
 async def get_temporal_client():
     if not hasattr(get_temporal_client, "client"):
-        get_temporal_client.client = await Client.connect(os.environ["TEMPORAL_HOST"])
+        get_temporal_client.client = await Client.connect(os.environ["TEMPORAL_HOST"], tls=True)
     return get_temporal_client.client
