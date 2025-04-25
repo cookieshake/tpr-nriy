@@ -9,6 +9,10 @@ from tpr_nriy import get_temporal_client
 
 app = FastAPI(title="TPR NRIY HTTP Trigger")
 
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
 @app.post("/workflows/{workflow_name}")
 async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
     """
@@ -23,7 +27,7 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
     """
     try:
         # Create Temporal client
-        client = await Client.connect(os.environ["TEMPORAL_HOST"])
+        client = await get_temporal_client()
         
         # Start workflow
         handle = await client.start_workflow(
