@@ -22,13 +22,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
-
       - name: Install Railpack
-        run: npm install -g railpack
+        run: curl -sSL https://railpack.com/install.sh | sh
 
       - name: Build Docker image with Railpack
         run: railpack build --docker --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
