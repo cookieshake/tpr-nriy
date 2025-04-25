@@ -5,25 +5,9 @@ from typing import Dict, Any
 import json
 import importlib
 
-app = FastAPI(title="TPR NRIY HTTP Trigger")
+from tpr_nriy import get_temporal_client
 
-async def get_activity_function(activity_name: str):
-    """
-    Get activity function by name.
-    
-    Args:
-        activity_name: Name of the activity
-    
-    Returns:
-        Callable: Activity function
-    """
-    try:
-        # Import activity module
-        module = importlib.import_module(f"tpr_nriy.activities.{activity_name}")
-        # Get activity function
-        return getattr(module, activity_name)
-    except (ImportError, AttributeError) as e:
-        raise HTTPException(status_code=404, detail=f"Activity {activity_name} not found: {str(e)}")
+app = FastAPI(title="TPR NRIY HTTP Trigger")
 
 @app.post("/workflows/{workflow_name}")
 async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
@@ -51,29 +35,6 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
         
         # Get result
         result = await handle.result()
-        return result
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/activities/{activity_name}")
-async def trigger_activity(activity_name: str, input: Dict[str, Any]):
-    """
-    Trigger an activity by name.
-    
-    Args:
-        activity_name: Name of the activity to trigger
-        input: Input data for the activity
-    
-    Returns:
-        Any: Activity execution result
-    """
-    try:
-        # Get activity function
-        activity_func = await get_activity_function(activity_name)
-        
-        # Execute activity
-        result = await activity_func(**input)
         return result
         
     except Exception as e:
