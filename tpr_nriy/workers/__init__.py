@@ -35,8 +35,8 @@ def _discover_workers() -> Dict[str, Type]:
 # worker registry를 동적으로 생성합니다.
 worker_registry = _discover_workers()
 
-def get_worker(worker_name: str) -> Worker:
+def get_worker(worker_name: str):
     """worker 이름으로 worker 함수를 가져옵니다."""
     if worker_name not in worker_registry:
         raise ValueError(f"Unknown worker: {worker_name}")
-    return worker_registry[worker_name](temporal_client)
+    return worker_registry[worker_name]
