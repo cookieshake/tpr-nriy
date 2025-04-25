@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException
 from temporalio.client import Client
 from typing import Dict, Any
@@ -38,7 +39,7 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
     """
     try:
         # Create Temporal client
-        client = await Client.connect("localhost:7233")
+        client = await Client.connect(os.environ["TEMPORAL_HOST"])
         
         # Start workflow
         handle = await client.start_workflow(
