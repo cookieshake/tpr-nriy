@@ -1,5 +1,5 @@
 import os
-from tpr_nriy.workers import get_worker
+from tpr_nriy.workers import get_worker, worker_registry
 from tpr_nriy.trigger.http import app
 import uvicorn
 import anyio
@@ -21,7 +21,7 @@ async def run_worker(worker_name: str, task_queue_name: str):
         await worker_func(task_queue_name)
     except ValueError as e:
         print(f"Error: {e}")
-        print(f"Available workers: {', '.join(get_worker.__annotations__['worker_registry'].keys())}")
+        print(f"Available workers: {', '.join(worker_registry.keys())}")
 
 async def run_trigger():
     """
