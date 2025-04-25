@@ -5,6 +5,8 @@ from pathlib import Path
 
 from temporalio.worker import Worker
 
+from tpr_nriy import temporal_client
+
 def _discover_workers() -> Dict[str, Type]:
     """workers 디렉토리에서 모든 worker 함수를 찾아서 등록합니다."""
     worker_registry = {}
@@ -24,7 +26,7 @@ def _discover_workers() -> Dict[str, Type]:
             if hasattr(module, "create_worker"):
                 # 파일 이름에서 worker 이름을 추출합니다 (예: hello_worker.py -> hello)
                 worker_name = module_info.name.replace("_worker", "")
-                worker_registry[worker_name] = module.create_worker()
+                worker_registry[worker_name] = module.create_worker
         except ImportError as e:
             print(f"Warning: {module_info.name} 모듈을 로드하는데 실패했습니다: {e}")
     
@@ -37,4 +39,4 @@ def get_worker(worker_name: str) -> Worker:
     """worker 이름으로 worker 함수를 가져옵니다."""
     if worker_name not in worker_registry:
         raise ValueError(f"Unknown worker: {worker_name}")
-    return worker_registry[worker_name]
+    return worker_registry[worker_name](temporal_client)
