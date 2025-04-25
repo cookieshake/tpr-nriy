@@ -5,8 +5,6 @@ from pathlib import Path
 
 from temporalio.worker import Worker
 
-from tpr_nriy import temporal_client
-
 def _discover_workers() -> Dict[str, Type]:
     """workers 디렉토리에서 모든 worker 함수를 찾아서 등록합니다."""
     worker_registry = {}
