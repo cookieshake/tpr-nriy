@@ -46,7 +46,7 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
             workflow_name,
             json.dumps(input),
             id=f"{workflow_name}-{input.get('logId', '')}",
-            task_queue="nriy-task-queue"
+            task_queue="nriy"
         )
         
         # Get result

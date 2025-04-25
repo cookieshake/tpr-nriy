@@ -107,7 +107,8 @@ class RouterWorkflow:
                     "chat_history": history,
                     "user_id": parsed_input.user_id
                 },
-                id=f"nriy_v1-{parsed_input.message_id}"
+                id=f"nriy_v1-{parsed_input.message_id}",
+                task_queue="nriy"
             )
 
             # Add response to PocketBase
