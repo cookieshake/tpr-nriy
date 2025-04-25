@@ -22,26 +22,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install Railpack
+        run: npm install -g railpack
+
+      - name: Build Docker image with Railpack
+        run: railpack build --docker --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      - name: Build and push Docker image with Railpack
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          builder: railpack
-          build-args: |
-            PYTHON_VERSION=3.13
-            ENTRYPOINT=main.py 
+      - name: Push image to Docker Hub
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
