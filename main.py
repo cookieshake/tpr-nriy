@@ -18,7 +18,7 @@ async def run_worker(worker_name: str):
         temporal_client = await get_temporal_client()
         # Get worker function
         worker_func = get_worker(worker_name)
-        worker: Worker = worker_func(temporal_client)
+        worker: Worker = await worker_func(temporal_client)
         
         # Run worker
         print(f"Starting worker '{worker_name}'...")
