@@ -46,9 +46,10 @@ jobs:
 
       - name: Railpack build
         run: |
+          PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed 's/\//_/g')
           docker buildx build \
             --build-arg BUILDKIT_SYNTAX="ghcr.io/railwayapp/railpack-frontend" \
-            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-${{ matrix.platform }} \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$PLATFORM_TAG \
             -f railpack-plan.json \
             --platform ${{ matrix.platform }} \
             --push \
@@ -58,6 +59,6 @@ jobs:
         if: matrix.platform == 'linux/amd64'
         run: |
           docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux/amd64 \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux/arm64
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_amd64 \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_arm64
           docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
