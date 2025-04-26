@@ -55,20 +55,6 @@ jobs:
             --push \
             .
 
-      - name: Verify image push
-        run: |
-          PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed 's/\//_/g')
-          for i in {1..10}; do
-            if docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$PLATFORM_TAG; then
-              echo "Image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$PLATFORM_TAG is available"
-              exit 0
-            fi
-            echo "Waiting for image to be available... Attempt $i"
-            sleep 10
-          done
-          echo "Error: Failed to verify image push for ${{ matrix.platform }}"
-          exit 1
-
   create-manifest:
     needs: build-platforms
     runs-on: ubuntu-latest
@@ -86,16 +72,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Verify images before manifest creation
-        run: |
-          for platform in linux_amd64 linux_arm64; do
-            if ! docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$platform; then
-              echo "Error: Image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$platform is not available"
-              exit 1
-            fi
-            echo "Verified ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$platform is available"
-          done
 
       - name: Create and push manifest
         run: |
