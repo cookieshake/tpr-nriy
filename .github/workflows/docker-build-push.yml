@@ -73,9 +73,34 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Wait for images to be available
+        run: |
+          for i in {1..10}; do
+            if docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_amd64 && \
+               docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_arm64; then
+              break
+            fi
+            echo "Waiting for images to be available... Attempt $i"
+            sleep 10
+          done
+
       - name: Create and push manifest
         run: |
+          # Remove existing manifest if it exists
+          docker manifest rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest || true
+          
+          # Create new manifest
           docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_amd64 \
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_arm64
+          
+          # Annotate manifests
+          docker manifest annotate ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_amd64 \
+            --os linux --arch amd64
+          docker manifest annotate ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_arm64 \
+            --os linux --arch arm64
+          
+          # Push manifest
           docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
