@@ -52,7 +52,7 @@ jobs:
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$PLATFORM_TAG \
             -f railpack-plan.json \
             --platform ${{ matrix.platform }} \
-            --push \
+            --output=type=image,push=true \
             .
 
   create-manifest:
