@@ -55,6 +55,20 @@ jobs:
             --push \
             .
 
+      - name: Verify image push
+        run: |
+          PLATFORM_TAG=$(echo ${{ matrix.platform }} | sed 's/\//_/g')
+          for i in {1..10}; do
+            if docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$PLATFORM_TAG; then
+              echo "Image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$PLATFORM_TAG is available"
+              exit 0
+            fi
+            echo "Waiting for image to be available... Attempt $i"
+            sleep 10
+          done
+          echo "Error: Failed to verify image push for ${{ matrix.platform }}"
+          exit 1
+
   create-manifest:
     needs: build-platforms
     runs-on: ubuntu-latest
@@ -73,21 +87,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Wait for images to be available
+      - name: Verify images before manifest creation
         run: |
-          for i in {1..10}; do
-            if docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_amd64 && \
-               docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_arm64; then
-              break
+          for platform in linux_amd64 linux_arm64; do
+            if ! docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$platform; then
+              echo "Error: Image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$platform is not available"
+              exit 1
             fi
-            echo "Waiting for images to be available... Attempt $i"
-            sleep 10
+            echo "Verified ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$platform is available"
           done
 
       - name: Create and push manifest
         run: |
-          # Remove existing manifest if it exists
-          docker manifest rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest || true
+          # Check if manifest exists and remove it if it does
+          if docker manifest inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest >/dev/null 2>&1; then
+            docker manifest rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          fi
           
           # Create new manifest
           docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
