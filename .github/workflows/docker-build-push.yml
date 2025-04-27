@@ -43,6 +43,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Install Railpack
+        run: curl -sSL https://railpack.com/install.sh | sh
+
+      - name: Railpack prepare
+        run: railpack prepare . --plan-out railpack-plan.json --info-out railpack-info.json
+
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v6
@@ -50,6 +56,9 @@ jobs:
           platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ env.REGISTRY_IMAGE }}
+          build-args: |
+            BUILDKIT_SYNTAX=ghcr.io/railwayapp/railpack-frontend
+          file: railpack-plan.json
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
