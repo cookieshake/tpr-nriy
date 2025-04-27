@@ -52,7 +52,7 @@ jobs:
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-$PLATFORM_TAG \
             -f railpack-plan.json \
             --platform ${{ matrix.platform }} \
-            --output=type=image,push=true \
+            --push \
             .
 
   create-manifest:
@@ -75,23 +75,24 @@ jobs:
 
       - name: Create and push manifest
         run: |
-          # Check if manifest exists and remove it if it does
-          if docker manifest inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest >/dev/null 2>&1; then
-            docker manifest rm ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          fi
-          
-          # Create new manifest
+          # Get digests
+          AMD64_DIGEST=$(docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_amd64 | grep "Name:" | awk '{print $2}')
+          ARM64_DIGEST=$(docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_arm64 | grep "Name:" | awk '{print $2}')
+
+          echo "AMD64 digest: ${AMD64_DIGEST}"
+          echo "ARM64 digest: ${ARM64_DIGEST}"
+
+          # Create manifest
           docker manifest create ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_amd64 \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_arm64
-          
-          # Annotate manifests
+            ${AMD64_DIGEST} \
+            ${ARM64_DIGEST}
+
+          # Annotate
           docker manifest annotate ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_amd64 \
-            --os linux --arch amd64
+            ${AMD64_DIGEST} --os linux --arch amd64
+
           docker manifest annotate ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-linux_arm64 \
-            --os linux --arch arm64
-          
+            ${ARM64_DIGEST} --os linux --arch arm64
+
           # Push manifest
           docker manifest push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
