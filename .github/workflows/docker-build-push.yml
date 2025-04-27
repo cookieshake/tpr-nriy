@@ -55,13 +55,21 @@ jobs:
       - name: Build and push by digest
         id: build
         run: |
-          docker buildx build \
+          digest=$(docker buildx build \
             --platform ${{ matrix.platform }} \
             --tag ${{ env.REGISTRY_IMAGE }} \
             --build-arg BUILDKIT_SYNTAX=ghcr.io/railwayapp/railpack-frontend \
             --file railpack-plan.json \
             --output type=image,push-by-digest=true,name-canonical=true,push=true \
-            . | tee /dev/stderr | grep -o 'sha256:[a-f0-9]\{64\}' | head -1
+            . | tee /dev/stderr | grep -o 'sha256:[a-f0-9]\{64\}' | head -1)
+          echo "digest: $digest"
+          mkdir -p ${{ runner.temp }}/digests
+          if [ -n "$digest" ]; then
+            touch "${{ runner.temp }}/digests/${digest#sha256:}"
+          else
+            echo "digest is empty!"
+            exit 1
+          fi
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
