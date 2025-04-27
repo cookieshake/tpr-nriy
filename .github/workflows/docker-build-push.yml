@@ -61,11 +61,7 @@ jobs:
             --build-arg BUILDKIT_SYNTAX=ghcr.io/railwayapp/railpack-frontend \
             --file railpack-plan.json \
             --output type=image,push-by-digest=true,name-canonical=true,push=true \
-            .
-          # digest 추출 및 저장
-          digest=$(docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }} --format '{{json .Manifest.Digest}}' | tr -d '"')
-          mkdir -p ${{ runner.temp }}/digests
-          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+            . | tee /dev/stderr | grep -o 'sha256:[a-f0-9]\{64\}' | head -1
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
