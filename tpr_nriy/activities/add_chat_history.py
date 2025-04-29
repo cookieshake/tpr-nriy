@@ -9,7 +9,6 @@ async def add_chat_history(
     message_id: str,
     chat_id: str,
     chat_name: str,
-    user_id: str,
     user_name: str,
     message: str
 ) -> str:
@@ -29,24 +28,13 @@ async def add_chat_history(
     message_record = {
         "id": message_id,
         "chat_id": chat_id,
-        "user_id": user_id,
+        "chat_name": chat_name,
+        "user_name": user_name,
         "message": message
-    }
-    user_record = {
-        "id": user_id,
-        "name": user_name
-    }
-    chat_record = {
-        "id": chat_id,
-        "name": chat_name
     }
     
     # Create PocketBase client and add records concurrently
     client = PocketBaseClient()
-    await asyncio.gather(
-        client.upsert_record("messages", message_id, message_record),
-        client.upsert_record("users", user_id, user_record),
-        client.upsert_record("chats", chat_id, chat_record)
-    )
+    await client.upsert_record("messages", message_id, message_record),
     
     return message_id 

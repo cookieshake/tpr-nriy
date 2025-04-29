@@ -13,7 +13,6 @@ class NriyRouterInput(BaseModel):
     message_id: str
     chat_id: str
     chat_name: str
-    user_id: str
     user_name: str
     message: str
 
@@ -38,7 +37,6 @@ class RouterWorkflow:
             message_id=input["logId"],
             chat_id=input["channelId"],
             chat_name=input["room"],
-            user_id=input["author"]["name"],
             user_name=input["author"]["name"],
             message=input["content"]
         )
@@ -55,7 +53,6 @@ class RouterWorkflow:
                 "message_id": parsed_input.message_id,
                 "chat_id": parsed_input.chat_id,
                 "chat_name": parsed_input.chat_name,
-                "user_id": parsed_input.user_id,
                 "user_name": parsed_input.user_name,
                 "message": parsed_input.message
             },
@@ -105,7 +102,7 @@ class RouterWorkflow:
                 {
                     "message": parsed_input.message,
                     "chat_history": history,
-                    "user_id": parsed_input.user_id
+                    "user_name": parsed_input.user_name
                 },
                 id=f"nriy_v1-{parsed_input.message_id}",
                 task_queue="nriy"
@@ -118,7 +115,6 @@ class RouterWorkflow:
                     "message_id": f"msg-{workflow.now().timestamp()}",
                     "chat_id": parsed_input.chat_id,
                     "chat_name": parsed_input.chat_name,
-                    "user_id": "assistant",
                     "user_name": "Assistant",
                     "message": response["response"]
                 },
