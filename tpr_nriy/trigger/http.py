@@ -4,6 +4,7 @@ from temporalio.client import Client
 from typing import Dict, Any
 import json
 import importlib
+import uuid
 
 from tpr_nriy import get_temporal_client
 
@@ -33,7 +34,7 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
         handle = await client.start_workflow(
             workflow_name,
             json.dumps(input),
-            id=f"{workflow_name}-{input.get('logId', '')}",
+            id=str(uuid.uuid4()),
             task_queue="nriy"
         )
         
