@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from fastapi import FastAPI, HTTPException
 from temporalio.common import RetryPolicy
-
+import anyio
 
 from tpr_nriy import get_temporal_client
 
@@ -37,10 +37,25 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
             json.dumps(input),
             id=str(uuid.uuid4()),
             task_queue="nriy",
+            execution_timeout=timedelta(seconds=300),
             retry_policy=RetryPolicy(
                 maximum_attempts=1
             )
         )
+        
+        while True:
+            history = await handle.fetch_history()
+            
+            started_events = [e for e in history.events if e.event_type == "WorkflowExecutionStarted"]
+            failed_events = [e for e in history.events if e.event_type == "WorkflowTaskFailed"]
+            
+            if started_events:
+                break
+            elif failed_events:
+                await handle.cancel()
+                raise HTTPException(status_code=500, detail=failed_events[0].workflow_task_failed_event_attributes.failure.cause.message)
+            
+            await anyio.sleep(0.5)
         
         # Get result
         result = await handle.result()
