@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from fastapi import FastAPI, HTTPException
 from temporalio.common import RetryPolicy
+from temporalio.api.enums.v1 import EventType
 import anyio
 
 from tpr_nriy import get_temporal_client
@@ -46,8 +47,8 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
         while True:
             history = await handle.fetch_history()
             
-            started_events = [e for e in history.events if e.event_type == "WorkflowExecutionStarted"]
-            failed_events = [e for e in history.events if e.event_type in ["WorkflowTaskFailed", "WorkflowTaskTimedOut"]]
+            started_events = [e for e in history.events if e.event_type == EventType.WORKFLOW_EXECUTION_STARTED]
+            failed_events = [e for e in history.events if e.event_type in [EventType.WORKFLOW_TASK_FAILED, EventType.WORKFLOW_TASK_TIMED_OUT]]
             
             if started_events:
                 break
