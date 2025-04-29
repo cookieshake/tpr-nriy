@@ -41,7 +41,8 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
             execution_timeout=timedelta(seconds=300),
             retry_policy=RetryPolicy(
                 maximum_attempts=1
-            )
+            ),
+            task_timeout=timedelta(seconds=5)
         )
         
         while True:
