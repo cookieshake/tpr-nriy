@@ -53,7 +53,7 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
             if completed_events:
                 break
             elif failed_events:
-                await handle.cancel()
+                await handle.terminate(reason="Workflow Task Failed")
                 raise HTTPException(status_code=500, detail=failed_events[0].workflow_task_failed_event_attributes.failure.cause.message)
             
             await anyio.sleep(0.5)
