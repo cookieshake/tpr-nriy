@@ -47,10 +47,10 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
         while True:
             history = await handle.fetch_history()
             
-            started_events = [e for e in history.events if e.event_type == EventType.EVENT_TYPE_WORKFLOW_EXECUTION_STARTED]
+            completed_events = [e for e in history.events if e.event_type == EventType.EVENT_TYPE_WORKFLOW_TASK_COMPLETED]
             failed_events = [e for e in history.events if e.event_type in [EventType.EVENT_TYPE_WORKFLOW_TASK_FAILED, EventType.EVENT_TYPE_WORKFLOW_TASK_TIMED_OUT]]
             
-            if started_events:
+            if completed_events:
                 break
             elif failed_events:
                 await handle.cancel()
