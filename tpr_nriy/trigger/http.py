@@ -1,10 +1,11 @@
-import os
-from fastapi import FastAPI, HTTPException
-from temporalio.client import Client
 from typing import Dict, Any
 import json
-import importlib
 import uuid
+from datetime import timedelta
+
+from fastapi import FastAPI, HTTPException
+from temporalio.common import RetryPolicy
+
 
 from tpr_nriy import get_temporal_client
 
@@ -35,7 +36,10 @@ async def trigger_workflow(workflow_name: str, input: Dict[str, Any]):
             workflow_name,
             json.dumps(input),
             id=str(uuid.uuid4()),
-            task_queue="nriy"
+            task_queue="nriy",
+            retry_policy=RetryPolicy(
+                maximum_attempts=1
+            )
         )
         
         # Get result
